@@ -16,6 +16,7 @@ router.get('/', function(req, res, next) {
 });
 /* POST talent */
 router.post('/', function(req, res, next) {
+  console.log(req.body);
   Talent.forge({
     talent_legacy_id: req.body.talentLegacyId,
     first_name: req.body.firstName,
@@ -33,6 +34,33 @@ router.post('/', function(req, res, next) {
 });
 
 //TODO: PUT route to update a talent
-
+router.put('/', function(req, res, next) {
+  //find talent, update talent with data from request, save talent. Conquer.
+  Talent.forge({
+    first_name: req.body.firstName,
+    last_name: req.body.lastName})
+      .fetch({require: true})
+      .then(function(talent) {
+        var temp = {};
+        temp[req.body.field] = req.body.content;
+        talent.save(temp)
+            .then(function(talent){
+          console.log("talent update successful!");
+                res.send(talent);
+        });
+      });
+});
 //TODO: DELETE route to delete a talent
+router.delete('/', function(req, res, next) {
+    Talent.forge({
+        first_name: req.body.firstName,
+        last_name: req.body.lastName})
+        .fetch({require: true})
+        .then(function(talent) {
+            talent.destroy()
+            .then(function() {
+                res.send("File deleted");
+            });
+        });
+    });
 module.exports = router;
