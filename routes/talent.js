@@ -26,7 +26,14 @@ router.post('/', function(req, res, next) {
   })
     .save()
     .then(function(talent){
-      res.json({talentId: talent.get('talent_id')});
+        talent.load(['skills'])
+            .then(function(model){
+                model.skills().attach(req.body.skills);
+                res.json({talentId: talent.get('talent_id'),skill: "They're added too!"});
+            })
+            .catch(function(err){
+                next(err);
+            });
     })
     .catch(function(err) {
       next(err);
@@ -51,16 +58,22 @@ router.put('/', function(req, res, next) {
       });
 });
 //TODO: DELETE route to delete a talent
-router.delete('/', function(req, res, next) {
+router.delete('/:id', function(req, res, next) {
+    console.log(req.params.id);
     Talent.forge({
-        first_name: req.body.firstName,
-        last_name: req.body.lastName})
+        talent_id: req.params.id})
         .fetch({require: true})
         .then(function(talent) {
             talent.destroy()
             .then(function() {
                 res.send("File deleted");
+            })
+            .catch(function(err) {
+                next(err);
             });
+        })
+        .catch(function(err) {
+            next(err);
         });
     });
 module.exports = router;
